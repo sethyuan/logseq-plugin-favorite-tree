@@ -1,0 +1,29 @@
+{
+  "name": "logseq-plugin-favorite-tree",
+  "version": "1.0.0",
+  "main": "dist/index.html",
+  "logseq": {
+    "id": "_sethyuan-logseq-favorite-tree",
+    "icon": "./icon.png"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@logseq/libs": "^0.0.15",
+    "immer": "^9.0.19",
+    "logseq-l10n": "^0.2.0",
+    "preact": "^10.14.1",
+    "rambdax": "^10.0.0",
+    "reactutils": "^5.13.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.5.0",
+    "@types/node": "^18.15.11",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8",
+    "vite-plugin-logseq": "^1.1.2"
+  }
+}
