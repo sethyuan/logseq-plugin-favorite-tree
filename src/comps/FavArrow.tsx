@@ -9,7 +9,7 @@ export default function FavArrow({
 }) {
   return (
     <span
-      class={cls("kef-ae-fav-arrow", expanded && "kef-ae-fav-arrow-expanded")}
+      class={cls("kef-ft-fav-arrow", expanded && "kef-ft-fav-arrow-expanded")}
       onClick={onToggle}
     >
       <svg

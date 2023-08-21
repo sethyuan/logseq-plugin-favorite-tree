@@ -115,7 +115,7 @@ function SubList({ items, shown }: { items: any[]; shown: boolean }) {
 
   return (
     <div
-      class={cls("kef-ae-fav-list", shown && "kef-ae-fav-expanded")}
+      class={cls("kef-ft-fav-list", shown && "kef-ft-fav-expanded")}
       onMouseDown={preventSideEffect}
     >
       {items.map((item) => {
@@ -126,17 +126,17 @@ function SubList({ items, shown }: { items: any[]; shown: boolean }) {
 
         return (
           <div key={item.name}>
-            <div class="kef-ae-fav-item" onClick={(e) => openPage(e, item)}>
+            <div class="kef-ft-fav-item" onClick={(e) => openPage(e, item)}>
               {item.filters ? (
-                <div class="kef-ae-fav-item-icon">
+                <div class="kef-ft-fav-item-icon">
                   {logseq.settings?.filterIcon ?? "🔎"}
                 </div>
               ) : item.properties?.icon ? (
-                <div class="kef-ae-fav-item-icon">{item.properties?.icon}</div>
+                <div class="kef-ft-fav-item-icon">{item.properties?.icon}</div>
               ) : (
-                <span class="ui__icon tie tie-page kef-ae-fav-item-icon"></span>
+                <span class="ui__icon tie tie-page kef-ft-fav-item-icon"></span>
               )}
-              <div class="kef-ae-fav-item-name" title={displayName}>
+              <div class="kef-ft-fav-item-name" title={displayName}>
                 {item.filters &&
                 displayName.toLowerCase().startsWith(`${item.name}/`)
                   ? displayName.substring(item.name.length + 1)

@@ -62,9 +62,12 @@ async function main() {
 
   const favoritesObserver = new MutationObserver(async (mutationList) => {
     const mutation = mutationList[0]
+    if (mutation?.target == null) return
+    const target = mutation.target as HTMLElement
+
     if (
-      (mutation?.target as any).classList?.contains("bd") ||
-      (mutation?.target as any).classList?.contains("favorites")
+      target.classList?.contains("bd") ||
+      target.classList?.contains("favorites")
     ) {
       await processFavorites()
     }
@@ -79,7 +82,7 @@ async function main() {
   await processFavorites()
 
   const graph = (await logseq.App.getCurrentGraph())!
-  const storedWidth = parent.localStorage.getItem(`kef-ae-lsw-${graph.name}`)
+  const storedWidth = parent.localStorage.getItem(`kef-ft-lsw-${graph.name}`)
   if (storedWidth) {
     parent.document.documentElement.style.setProperty(
       "--ls-left-sidebar-width",
@@ -88,13 +91,13 @@ async function main() {
   }
 
   logseq.provideUI({
-    key: "kef-ae-drag-handle",
+    key: "kef-ft-drag-handle",
     path: "#left-sidebar",
-    template: `<div class="kef-ae-drag-handle"></div>`,
+    template: `<div class="kef-ft-drag-handle"></div>`,
   })
   setTimeout(() => {
     dragHandle = parent.document.querySelector(
-      "#left-sidebar .kef-ae-drag-handle",
+      "#left-sidebar .kef-ft-drag-handle",
     )!
     dragHandle.addEventListener("pointerdown", onPointerDown)
   }, 0)
@@ -110,34 +113,34 @@ async function main() {
 
 function provideStyles() {
   logseq.provideStyle({
-    key: "kef-ae-fav",
+    key: "kef-ft-fav",
     style: `
-      .kef-ae-fav-list {
+      .kef-ft-fav-list {
         padding-left: 24px;
         display: none;
       }
-      .kef-ae-fav-expanded {
+      .kef-ft-fav-expanded {
         display: block;
       }
-      .kef-ae-fav-arrow {
+      .kef-ft-fav-arrow {
         flex: 0 0 auto;
         padding: 4px 20px 4px 10px;
         margin-right: -20px;
         opacity: ${logseq.settings?.hoverArrow ? 0 : 1};
         transition: opacity 0.3s;
       }
-      :is(.favorite-item, .recent-item):hover > a > .kef-ae-fav-arrow,
-      .kef-ae-fav-item:hover > .kef-ae-fav-arrow {
+      :is(.favorite-item, .recent-item):hover > a > .kef-ft-fav-arrow,
+      .kef-ft-fav-item:hover > .kef-ft-fav-arrow {
         opacity: 1;
       }
-      .kef-ae-fav-arrow svg {
+      .kef-ft-fav-arrow svg {
         transform: rotate(90deg) scale(0.8);
         transition: transform 0.04s linear;
       }
-      .kef-ae-fav-arrow-expanded svg {
+      .kef-ft-fav-arrow-expanded svg {
         transform: rotate(0deg) scale(0.8);
       }
-      .kef-ae-fav-item {
+      .kef-ft-fav-item {
         display: flex;
         align-items: center;
         padding: 0 24px;
@@ -145,23 +148,23 @@ function provideStyles() {
         color: var(--ls-header-button-background);
         cursor: pointer;
       }
-      .kef-ae-fav-item:hover {
+      .kef-ft-fav-item:hover {
         background-color: var(--ls-quaternary-background-color);
       }
-      .kef-ae-fav-item-icon {
+      .kef-ft-fav-item-icon {
         flex: 0 0 auto;
         margin-right: 5px;
         width: 16px;
         text-align: center;
       }
-      .kef-ae-fav-item-name {
+      .kef-ft-fav-item-name {
         flex: 1 1 auto;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
       }
 
-      .kef-ae-drag-handle {
+      .kef-ft-drag-handle {
         content: "";
         position: absolute;
         top: 0;
@@ -170,15 +173,15 @@ function provideStyles() {
         width: 4px;
         z-index: 10;
       }
-      .kef-ae-drag-handle:hover,
-      .kef-ae-dragging .kef-ae-drag-handle {
+      .kef-ft-drag-handle:hover,
+      .kef-ft-dragging .kef-ft-drag-handle {
         cursor: col-resize;
         background: var(--ls-active-primary-color);
       }
-      .kef-ae-dragging {
+      .kef-ft-dragging {
         cursor: col-resize;
       }
-      .kef-ae-dragging :is(#left-sidebar, #main-content-container) {
+      .kef-ft-dragging :is(#left-sidebar, #main-content-container) {
         pointer-events: none;
       }
     `,
@@ -198,11 +201,10 @@ async function processFavorites() {
 }
 
 async function injectList(el: HTMLElement, items: any[]) {
-  const isFav = el.classList.contains("favorite-item")
-  const key = `kef-ae-${isFav ? "f" : "r"}-${await hash(el.dataset.ref!)}`
+  const key = `kef-ft-f-${await hash(el.dataset.ref!)}`
 
   const arrowContainer = el.querySelector("a")!
-  const arrow = arrowContainer.querySelector(".kef-ae-fav-arrow")
+  const arrow = arrowContainer.querySelector(".kef-ft-fav-arrow")
   if (arrow != null) {
     arrow.remove()
   }
@@ -210,9 +212,7 @@ async function injectList(el: HTMLElement, items: any[]) {
   if (parent.document.getElementById(key) == null) {
     logseq.provideUI({
       key,
-      path: `.${isFav ? "favorite" : "recent"}-item[data-ref="${
-        el.dataset.ref
-      }"]`,
+      path: `.favorite-item[data-ref="${el.dataset.ref}"]`,
       template: `<div id="${key}"></div>`,
     })
   }
@@ -268,7 +268,7 @@ function needsProcessing(txData: any[]) {
 
 function onPointerDown(e: Event) {
   e.preventDefault()
-  parent.document.documentElement.classList.add("kef-ae-dragging")
+  parent.document.documentElement.classList.add("kef-ft-dragging")
   parent.document.addEventListener("pointermove", onPointerMove)
   parent.document.addEventListener("pointerup", onPointerUp)
   parent.document.addEventListener("pointercancel", onPointerUp)
@@ -279,7 +279,7 @@ function onPointerUp(e: MouseEvent) {
   parent.document.removeEventListener("pointermove", onPointerMove)
   parent.document.removeEventListener("pointerup", onPointerUp)
   parent.document.removeEventListener("pointercancel", onPointerUp)
-  parent.document.documentElement.classList.remove("kef-ae-dragging")
+  parent.document.documentElement.classList.remove("kef-ft-dragging")
 
   const pos = e.clientX
   parent.document.documentElement.style.setProperty(
@@ -288,7 +288,7 @@ function onPointerUp(e: MouseEvent) {
   )
   ;(async () => {
     const graph = (await logseq.App.getCurrentGraph())!
-    parent.localStorage.setItem(`kef-ae-lsw-${graph.name}`, `${pos}`)
+    parent.localStorage.setItem(`kef-ft-lsw-${graph.name}`, `${pos}`)
   })()
 }
 

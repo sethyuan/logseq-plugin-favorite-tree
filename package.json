@@ -1,6 +1,6 @@
 {
   "name": "logseq-plugin-favorite-tree",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.html",
   "logseq": {
     "id": "_sethyuan-logseq-favorite-tree",
@@ -15,7 +15,7 @@
     "@logseq/libs": "^0.0.15",
     "immer": "^9.0.19",
     "logseq-l10n": "^0.2.0",
-    "preact": "^10.14.1",
+    "preact": "10.12.1",
     "rambdax": "^10.0.0",
     "reactutils": "^5.13.0"
   },
