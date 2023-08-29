@@ -44,18 +44,20 @@ export async function queryForSubItems(name: string) {
     await logseq.DB.datascriptQuery(
       hierarchyProperty === "tags"
         ? `[:find (pull ?p [:block/name :block/original-name :block/uuid :block/properties])
-            :in $ ?name
+            :in $ ?name ?equals ?contains
             :where
             [?t :block/name ?name]
             [?p :block/tags ?t]]`
         : `[:find (pull ?p [:block/name :block/original-name :block/uuid :block/properties])
-            :in $ ?name
+            :in $ ?name ?equals ?contains
             :where
             [?p :block/original-name]
             [?p :block/properties ?props]
             [(get ?props :${hierarchyProperty}) ?v]
-            (or [(= ?v ?name)] [(contains? ?v ?name)])]`,
+            (or [(?equals ?v ?name)] [(?contains ?v ?name)])]`,
       `"${name}"`,
+      equals,
+      contains,
     )
   ).flat()
 
@@ -173,4 +175,15 @@ function constructFilter(
     tags,
     obj.filters,
   )
+}
+
+function equals(prop: any, val: string) {
+  if (prop.toLowerCase == null) return false
+  return prop.toLowerCase() === val.toLowerCase()
+}
+
+function contains(prop: any, val: string) {
+  if (!Array.isArray(prop)) return false
+  const lowerVal = val.toLowerCase()
+  return prop.some((v) => v.toLowerCase().includes(lowerVal))
 }
