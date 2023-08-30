@@ -185,5 +185,5 @@ function equals(prop: any, val: string) {
 function contains(prop: any, val: string) {
   if (!Array.isArray(prop)) return false
   const lowerVal = val.toLowerCase()
-  return prop.some((v) => v.toLowerCase().includes(lowerVal))
+  return prop.some((v) => v.toLowerCase() === lowerVal)
 }
