@@ -79,16 +79,10 @@ async function main() {
 
   const transactionOff = logseq.DB.onChanged(onTransaction)
 
-  await processFavorites()
+  const graphOff = logseq.App.onCurrentGraphChanged(adjustLeftBarWidth)
 
-  const graph = (await logseq.App.getCurrentGraph())!
-  const storedWidth = parent.localStorage.getItem(`kef-ft-lsw-${graph.name}`)
-  if (storedWidth) {
-    parent.document.documentElement.style.setProperty(
-      "--ls-left-sidebar-width",
-      `${+storedWidth}px`,
-    )
-  }
+  await processFavorites()
+  await adjustLeftBarWidth()
 
   logseq.provideUI({
     key: "kef-ft-drag-handle",
@@ -103,6 +97,7 @@ async function main() {
   }, 0)
 
   logseq.beforeunload(async () => {
+    graphOff()
     transactionOff()
     favoritesObserver.disconnect()
     dragHandle?.removeEventListener("pointerdown", onPointerDown)
@@ -230,6 +225,17 @@ function renderList(key: string, items: any[], arrowContainer: HTMLElement) {
 async function onTransaction({ blocks, txData, txMeta }: any) {
   if (needsProcessing(txData)) {
     await processFavorites()
+  }
+}
+
+async function adjustLeftBarWidth() {
+  const graph = (await logseq.App.getCurrentGraph())!
+  const storedWidth = parent.localStorage.getItem(`kef-ft-lsw-${graph.name}`)
+  if (storedWidth) {
+    parent.document.documentElement.style.setProperty(
+      "--ls-left-sidebar-width",
+      `${+storedWidth}px`,
+    )
   }
 }
 
