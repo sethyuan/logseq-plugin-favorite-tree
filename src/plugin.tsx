@@ -287,7 +287,7 @@ function onPointerUp(e: MouseEvent) {
   parent.document.removeEventListener("pointercancel", onPointerUp)
   parent.document.documentElement.classList.remove("kef-ft-dragging")
 
-  const pos = e.clientX
+  const pos = Math.max(150, e.clientX)
   parent.document.documentElement.style.setProperty(
     "--ls-left-sidebar-width",
     `${pos}px`,
@@ -300,7 +300,7 @@ function onPointerUp(e: MouseEvent) {
 
 function onPointerMove(e: MouseEvent) {
   e.preventDefault()
-  move(e.clientX)
+  move(Math.max(150, e.clientX))
 }
 
 const move = throttle((pos) => {
