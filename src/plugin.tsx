@@ -3,7 +3,7 @@ import { setup, t } from "logseq-l10n"
 import { render } from "preact"
 import { throttle } from "rambdax"
 import FavList from "./comps/FavList"
-import { hash, queryForSubItems, setLanguage } from "./libs/utils"
+import { hash, queryForSubItems, setLanguage, waitForEl } from "./libs/utils"
 import zhCN from "./translations/zh-CN.json"
 
 let dragHandle: HTMLElement | null = null
@@ -81,6 +81,7 @@ async function main() {
 
   const graphOff = logseq.App.onCurrentGraphChanged(adjustLeftBarWidth)
 
+  await waitForEl("#left-sidebar .favorite-item", 1000)
   await processFavorites()
   await adjustLeftBarWidth()
 

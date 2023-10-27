@@ -89,6 +89,23 @@ export async function queryForSubItems(name: string) {
   return result
 }
 
+export function waitForEl(selector: string, timeout: number) {
+  const start = Date.now()
+
+  function tryFindEl(resolve: (el: Element | null) => void) {
+    const el = parent.document.querySelector(selector)
+    if (el != null) {
+      resolve(el)
+    } else if (Date.now() - start <= timeout) {
+      setTimeout(() => tryFindEl(resolve), 100)
+    } else {
+      resolve(null)
+    }
+  }
+
+  return new Promise(tryFindEl)
+}
+
 async function getQuickFilters(name: string) {
   const [{ uuid: blockUUID }, { uuid: pageUUID }] = (
     await logseq.DB.datascriptQuery(
