@@ -214,13 +214,21 @@ async function injectList(el: HTMLElement, items: any[]) {
   }
 
   setTimeout(() => {
-    renderList(key, items, arrowContainer)
+    renderList(key, items, arrowContainer, el.dataset.ref!)
   }, 0)
 }
 
-function renderList(key: string, items: any[], arrowContainer: HTMLElement) {
+function renderList(
+  key: string,
+  items: any[],
+  arrowContainer: HTMLElement,
+  name: string,
+) {
   const el = parent.document.getElementById(key)!
-  render(<FavList items={items} arrowContainer={arrowContainer} />, el)
+  render(
+    <FavList items={items} arrowContainer={arrowContainer} name={name} />,
+    el,
+  )
 }
 
 async function onTransaction({ blocks, txData, txMeta }: any) {

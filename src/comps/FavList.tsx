@@ -1,23 +1,38 @@
 import { produce } from "immer"
 import { createPortal } from "preact/compat"
-import { useEffect, useState } from "preact/hooks"
+import { useEffect, useRef, useState } from "preact/hooks"
 import { cls } from "reactutils"
+import {
+  readExpansionState,
+  readRootExpansionState,
+  writeExpansionState,
+  writeRootExpansionState,
+} from "../libs/storage"
 import { queryForSubItems } from "../libs/utils"
 import FavArrow from "./FavArrow"
 
 export default function FavList({
   items,
   arrowContainer,
+  name,
 }: {
   items: any[]
   arrowContainer: HTMLElement
+  name: string
 }) {
   const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    ;(async () => {
+      setExpanded(await readRootExpansionState(name))
+    })()
+  }, [name])
 
   function toggleList(e: Event) {
     e.preventDefault()
     e.stopPropagation()
     setExpanded((v) => !v)
+    writeRootExpansionState(name, !expanded)
   }
 
   return (
@@ -26,13 +41,22 @@ export default function FavList({
         <FavArrow expanded={expanded} onToggle={toggleList} />,
         arrowContainer,
       )}
-      <SubList items={items} shown={expanded} />
+      <SubList items={items} shown={expanded} storageKey={name} />
     </>
   )
 }
 
-function SubList({ items, shown }: { items: any[]; shown: boolean }) {
+function SubList({
+  items,
+  shown,
+  storageKey,
+}: {
+  items: any[]
+  shown: boolean
+  storageKey: string
+}) {
   const [childrenData, setChildrenData] = useState<any>(null)
+  const expansionState = useRef<Record<string, boolean>>()
 
   useEffect(() => {
     setChildrenData(null)
@@ -41,19 +65,23 @@ function SubList({ items, shown }: { items: any[]; shown: boolean }) {
   useEffect(() => {
     if (shown && childrenData == null) {
       ;(async () => {
+        expansionState.current = await readExpansionState(storageKey)
         const data: any = {}
         for (const item of items) {
           if (item.filters) {
             if (item.subitems) {
               data[item.displayName] = {
-                expanded: false,
+                expanded: !!expansionState.current[item.displayName],
                 items: Object.values(item.subitems),
               }
             }
           } else {
             const subitems = await queryForSubItems(item["original-name"])
             if (subitems?.length > 0) {
-              data[item.name] = { expanded: false, items: subitems }
+              data[item.name] = {
+                expanded: !!expansionState.current[item.name],
+                items: subitems,
+              }
             }
           }
         }
@@ -106,6 +134,11 @@ function SubList({ items, shown }: { items: any[]; shown: boolean }) {
       draft[itemName].expanded = !draft[itemName].expanded
     })
     setChildrenData(newChildrenData)
+
+    if (expansionState.current) {
+      expansionState.current[itemName] = !childrenData[itemName].expanded
+      writeExpansionState(storageKey, expansionState.current)
+    }
   }
 
   function preventSideEffect(e: Event) {
@@ -154,7 +187,11 @@ function SubList({ items, shown }: { items: any[]; shown: boolean }) {
               )}
             </div>
             {data?.items?.length > 0 && (
-              <SubList items={data.items} shown={data.expanded} />
+              <SubList
+                items={data.items}
+                shown={data.expanded}
+                storageKey={`${storageKey}-${displayName}`}
+              />
             )}
           </div>
         )
