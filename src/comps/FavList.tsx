@@ -15,16 +15,18 @@ export default function FavList({
   items,
   arrowContainer,
   name,
+  readKeys,
 }: {
   items: any[]
   arrowContainer: HTMLElement
   name: string
+  readKeys?: Set<string>
 }) {
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     ;(async () => {
-      setExpanded(await readRootExpansionState(name))
+      setExpanded(await readRootExpansionState(name, readKeys))
     })()
   }, [name])
 
@@ -41,7 +43,12 @@ export default function FavList({
         <FavArrow expanded={expanded} onToggle={toggleList} />,
         arrowContainer,
       )}
-      <SubList items={items} shown={expanded} storageKey={name} />
+      <SubList
+        items={items}
+        shown={expanded}
+        storageKey={name}
+        readKeys={readKeys}
+      />
     </>
   )
 }
@@ -50,10 +57,12 @@ function SubList({
   items,
   shown,
   storageKey,
+  readKeys,
 }: {
   items: any[]
   shown: boolean
   storageKey: string
+  readKeys?: Set<string>
 }) {
   const [childrenData, setChildrenData] = useState<any>(null)
   const expansionState = useRef<Record<string, boolean>>()
@@ -65,7 +74,7 @@ function SubList({
   useEffect(() => {
     if (shown && childrenData == null) {
       ;(async () => {
-        expansionState.current = await readExpansionState(storageKey)
+        expansionState.current = await readExpansionState(storageKey, readKeys)
         const data: any = {}
         for (const item of items) {
           if (item.filters) {
@@ -191,6 +200,7 @@ function SubList({
                 items={data.items}
                 shown={data.expanded}
                 storageKey={`${storageKey}-${displayName}`}
+                readKeys={readKeys}
               />
             )}
           </div>

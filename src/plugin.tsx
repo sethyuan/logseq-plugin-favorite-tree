@@ -3,8 +3,11 @@ import { setup, t } from "logseq-l10n"
 import { render } from "preact"
 import { throttle } from "rambdax"
 import FavList from "./comps/FavList"
+import { allExpansionKeys, removeExpansionState } from "./libs/storage"
 import { hash, queryForSubItems, setLanguage, waitForEl } from "./libs/utils"
 import zhCN from "./translations/zh-CN.json"
+
+const CLEAN_WAIT = 3000
 
 let dragHandle: HTMLElement | null = null
 
@@ -82,7 +85,17 @@ async function main() {
   const graphOff = logseq.App.onCurrentGraphChanged(adjustLeftBarWidth)
 
   await waitForEl("#left-sidebar .favorite-item", 1000)
-  await processFavorites()
+
+  const readKeys = new Set<string>()
+  await processFavorites(readKeys)
+  setTimeout(async () => {
+    const keys = await allExpansionKeys()
+    const notReadKeys = keys.filter((key) => !readKeys.has(key))
+    for (const key of notReadKeys) {
+      await removeExpansionState(key)
+    }
+  }, CLEAN_WAIT)
+
   await adjustLeftBarWidth()
 
   logseq.provideUI({
@@ -184,19 +197,23 @@ function provideStyles() {
   })
 }
 
-async function processFavorites() {
+async function processFavorites(readKeys?: Set<string>) {
   const favorites = parent.document.querySelectorAll<HTMLElement>(
     `#left-sidebar .favorite-item`,
   )
   for (const fav of favorites) {
     const items = await queryForSubItems(fav.dataset.ref!)
     if (items?.length > 0) {
-      injectList(fav, items)
+      injectList(fav, items, readKeys)
     }
   }
 }
 
-async function injectList(el: HTMLElement, items: any[]) {
+async function injectList(
+  el: HTMLElement,
+  items: any[],
+  readKeys?: Set<string>,
+) {
   const key = `kef-ft-f-${await hash(el.dataset.ref!)}`
 
   const arrowContainer = el.querySelector("a")!
@@ -214,7 +231,7 @@ async function injectList(el: HTMLElement, items: any[]) {
   }
 
   setTimeout(() => {
-    renderList(key, items, arrowContainer, el.dataset.ref!)
+    renderList(key, items, arrowContainer, el.dataset.ref!, readKeys)
   }, 0)
 }
 
@@ -223,10 +240,16 @@ function renderList(
   items: any[],
   arrowContainer: HTMLElement,
   name: string,
+  readKeys?: Set<string>,
 ) {
   const el = parent.document.getElementById(key)!
   render(
-    <FavList items={items} arrowContainer={arrowContainer} name={name} />,
+    <FavList
+      items={items}
+      arrowContainer={arrowContainer}
+      name={name}
+      readKeys={readKeys}
+    />,
     el,
   )
 }
