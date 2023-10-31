@@ -1,5 +1,3 @@
-const storage = logseq.Assets.makeSandboxStorage()
-
 export async function readExpansionState(key: string, readKeys?: Set<string>) {
   const graphKey = await getGraphKey(key)
   readKeys?.add(graphKey)
@@ -40,6 +38,7 @@ export async function writeExpansionState(
 
 export async function allExpansionKeys() {
   const keys = await storage.allKeys()
+  if (keys == null) return []
   return keys
     .filter((key) => key.startsWith("expansion-"))
     .map((key) =>

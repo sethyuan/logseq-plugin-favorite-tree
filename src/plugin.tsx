@@ -68,7 +68,10 @@ async function main() {
     if (mutation?.target == null) return
     const target = mutation.target as HTMLElement
 
-    if (target.classList?.contains("nav-content-item-inner")) {
+    if (
+      target.classList?.contains("nav-content-item-inner") ||
+      target.classList?.contains("favorites")
+    ) {
       await processFavorites()
     }
   })
@@ -79,9 +82,13 @@ async function main() {
 
   const transactionOff = logseq.DB.onChanged(onTransaction)
 
-  const graphOff = logseq.App.onCurrentGraphChanged(adjustLeftBarWidth)
+  const graphOff = logseq.App.onCurrentGraphChanged(async () => {
+    ;(window as any).storage = logseq.Assets.makeSandboxStorage()
+    await adjustLeftBarWidth()
+  })
 
   await waitForEl("#left-sidebar .favorite-item", 1000)
+  ;(window as any).storage = logseq.Assets.makeSandboxStorage()
 
   const readKeys = new Set<string>()
   await processFavorites(readKeys)
