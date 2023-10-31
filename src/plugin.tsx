@@ -68,14 +68,11 @@ async function main() {
     if (mutation?.target == null) return
     const target = mutation.target as HTMLElement
 
-    if (
-      target.classList?.contains("bd") ||
-      target.classList?.contains("favorites")
-    ) {
+    if (target.classList?.contains("nav-content-item-inner")) {
       await processFavorites()
     }
   })
-  const favoritesEl = parent.document.querySelector("#left-sidebar .favorites")
+  const favoritesEl = await waitForEl("#left-sidebar .favorites", 300)
   if (favoritesEl != null) {
     favoritesObserver.observe(favoritesEl, { childList: true, subtree: true })
   }

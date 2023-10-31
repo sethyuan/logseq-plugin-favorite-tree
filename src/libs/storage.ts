@@ -1,10 +1,11 @@
 const storage = logseq.Assets.makeSandboxStorage()
 
 export async function readExpansionState(key: string, readKeys?: Set<string>) {
-  readKeys?.add(key)
-  key = `expansion-${key}.json`
-  const hasItem = await storage.hasItem(key)
-  const str = hasItem ? (await storage.getItem(key))! : "{}"
+  const graphKey = await getGraphKey(key)
+  readKeys?.add(graphKey)
+  const storeKey = `expansion-${graphKey}.json`
+  const hasItem = await storage.hasItem(storeKey)
+  const str = hasItem ? (await storage.getItem(storeKey))! : "{}"
   return JSON.parse(str) as Record<string, boolean>
 }
 
@@ -12,26 +13,29 @@ export async function readRootExpansionState(
   key: string,
   readKeys?: Set<string>,
 ) {
-  readKeys?.add(`_${key}`)
-  key = `expansion-_${key}.json`
-  if (await storage.hasItem(key)) {
-    return JSON.parse((await storage.getItem(key))!) as boolean
+  const graphKey = await getGraphKey(key)
+  readKeys?.add(`_${graphKey}`)
+  const storeKey = `expansion-_${graphKey}.json`
+  if (await storage.hasItem(storeKey)) {
+    return JSON.parse((await storage.getItem(storeKey))!) as boolean
   } else {
     return false
   }
 }
 
 export async function writeRootExpansionState(key: string, value: boolean) {
-  key = `expansion-_${key}.json`
-  await storage.setItem(key, `${value}`)
+  const graphKey = await getGraphKey(key)
+  const storeKey = `expansion-_${graphKey}.json`
+  await storage.setItem(storeKey, `${value}`)
 }
 
 export async function writeExpansionState(
   key: string,
   value: Record<string, boolean>,
 ) {
-  key = `expansion-${key}.json`
-  await storage.setItem(key, JSON.stringify(value))
+  const graphKey = await getGraphKey(key)
+  const storeKey = `expansion-${graphKey}.json`
+  await storage.setItem(storeKey, JSON.stringify(value))
 }
 
 export async function allExpansionKeys() {
@@ -46,4 +50,9 @@ export async function allExpansionKeys() {
 export async function removeExpansionState(key: string) {
   key = `expansion-${key}.json`
   await storage.removeItem(key)
+}
+
+async function getGraphKey(key: string) {
+  const graph = await logseq.App.getCurrentGraph()
+  return `${key}-${graph?.name ?? ""}`
 }
