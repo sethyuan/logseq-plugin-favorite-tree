@@ -40,7 +40,11 @@ export default function FavList({
   return (
     <>
       {createPortal(
-        <FavArrow expanded={expanded} onToggle={toggleList} />,
+        items.length > 0 ? (
+          <FavArrow expanded={expanded} onToggle={toggleList} />
+        ) : (
+          <></>
+        ),
         arrowContainer,
       )}
       <SubList

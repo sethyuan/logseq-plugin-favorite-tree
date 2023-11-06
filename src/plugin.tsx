@@ -207,9 +207,7 @@ async function processFavorites(readKeys?: Set<string>) {
   )
   for (const fav of favorites) {
     const items = await queryForSubItems(fav.dataset.ref!)
-    if (items?.length > 0) {
-      injectList(fav, items, readKeys)
-    }
+    injectList(fav, items ?? [], readKeys)
   }
 }
 
