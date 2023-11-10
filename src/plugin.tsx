@@ -218,12 +218,6 @@ async function injectList(
 ) {
   const key = `kef-ft-f-${await hash(el.dataset.ref!)}`
 
-  const arrowContainer = el.querySelector("a")!
-  const arrow = arrowContainer.querySelector(".kef-ft-fav-arrow")
-  if (arrow != null) {
-    arrow.remove()
-  }
-
   if (parent.document.getElementById(key) == null) {
     logseq.provideUI({
       key,
@@ -233,6 +227,12 @@ async function injectList(
   }
 
   setTimeout(() => {
+    const arrowContainer = el.querySelector("a")!
+    const arrows = arrowContainer.querySelectorAll(".kef-ft-fav-arrow")
+    for (const arrow of arrows) {
+      arrow.remove()
+    }
+
     renderList(key, items, arrowContainer, el.dataset.ref!, readKeys)
   }, 0)
 }
