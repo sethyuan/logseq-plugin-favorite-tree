@@ -30,6 +30,15 @@ export default function FavList({
     })()
   }, [name])
 
+  useEffect(() => {
+    if (items.length === 0) {
+      const arrows = arrowContainer.querySelectorAll(".kef-ft-fav-arrow")
+      for (const arrow of arrows) {
+        arrow.remove()
+      }
+    }
+  }, [items.length])
+
   function toggleList(e: Event) {
     e.preventDefault()
     e.stopPropagation()
@@ -39,14 +48,11 @@ export default function FavList({
 
   return (
     <>
-      {createPortal(
-        items.length > 0 ? (
-          <FavArrow expanded={expanded} onToggle={toggleList} />
-        ) : (
-          <></>
-        ),
-        arrowContainer,
-      )}
+      {items.length > 0 &&
+        createPortal(
+          <FavArrow expanded={expanded} onToggle={toggleList} />,
+          arrowContainer,
+        )}
       <SubList
         items={items}
         shown={expanded}
