@@ -59,7 +59,9 @@ export async function queryForSubItems(name: string) {
       equals,
       contains,
     )
-  ).flat()
+  )
+    .flat()
+    .filter((p: any) => !p.name.startsWith(`${name}/`))
 
   const quickFilters = await getQuickFilters(name)
 
