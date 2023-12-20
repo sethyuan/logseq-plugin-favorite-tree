@@ -132,6 +132,12 @@ function provideStyles() {
         padding-left: 24px;
         display: none;
       }
+      .favorite-item > div > div > .kef-ft-fav-list {
+        padding-left: 33px;
+      }
+      .favorite-item > div > div > .kef-ft-fav-list > div > .kef-ft-fav-item {
+        padding-left: 24px;
+      }
       .kef-ft-fav-expanded {
         display: block;
       }
@@ -156,7 +162,8 @@ function provideStyles() {
       .kef-ft-fav-item {
         display: flex;
         align-items: center;
-        padding: 0 24px;
+        padding-left: 20px;
+        padding-right: 24px;
         line-height: 28px;
         color: var(--ls-header-button-background);
         cursor: pointer;
