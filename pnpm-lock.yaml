@@ -8,9 +8,6 @@ dependencies:
   '@logseq/libs':
     specifier: ^0.0.15
     version: 0.0.15
-  immer:
-    specifier: ^9.0.19
-    version: 9.0.19
   logseq-l10n:
     specifier: ^0.2.0
     version: 0.2.0(@logseq/libs@0.0.15)
@@ -765,10 +762,6 @@ packages:
     dependencies:
       function-bind: 1.1.1
     dev: true
-
-  /immer@9.0.19:
-    resolution: {integrity: sha512-eY+Y0qcsB4TZKwgQzLaE/lqYMlKhv5J9dyd2RhhtGhNo2njPXDqU9XPfcNfa3MIDsdtZt5KlkIsirlo4dHsWdQ==}
-    dev: false
 
   /inherits@2.0.3:
     resolution: {integrity: sha512-x00IRNXNy63jwGkJmzPigoySHbaqpNuzKbBOmzK+g2OdZpQ9w+sxCN+VSB3ja7IAge2OP2qpfxTjeNcyjmW1uw==}

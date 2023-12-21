@@ -5,7 +5,7 @@ export default function FavArrow({
   onToggle,
 }: {
   expanded: boolean
-  onToggle: (e: Event) => void
+  onToggle: (e: MouseEvent) => void
 }) {
   return (
     <span

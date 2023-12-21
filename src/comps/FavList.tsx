@@ -1,4 +1,3 @@
-import { produce } from "immer"
 import { createPortal } from "preact/compat"
 import { useEffect, useRef, useState } from "preact/hooks"
 import { cls } from "reactutils"
@@ -23,6 +22,9 @@ export default function FavList({
   readKeys?: Set<string>
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [allExpansionState, setAllExpansionState] = useState<
+    boolean | undefined
+  >()
 
   useEffect(() => {
     ;(async () => {
@@ -39,10 +41,16 @@ export default function FavList({
     }
   }, [items.length])
 
-  function toggleList(e: Event) {
+  function toggleList(e: MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
+
     setExpanded((v) => !v)
+    if (e.altKey) {
+      setAllExpansionState(!expanded)
+    } else {
+      setAllExpansionState(undefined)
+    }
     writeRootExpansionState(name, !expanded)
   }
 
@@ -58,6 +66,7 @@ export default function FavList({
         shown={expanded}
         storageKey={name}
         readKeys={readKeys}
+        allExpansionState={allExpansionState}
       />
     </>
   )
@@ -68,11 +77,13 @@ function SubList({
   shown,
   storageKey,
   readKeys,
+  allExpansionState,
 }: {
   items: any[]
   shown: boolean
   storageKey: string
   readKeys?: Set<string>
+  allExpansionState?: boolean
 }) {
   const [childrenData, setChildrenData] = useState<any>(null)
   const expansionState = useRef<Record<string, boolean>>()
@@ -104,10 +115,38 @@ function SubList({
             }
           }
         }
+        updateChildrenData(data)
         setChildrenData(data)
       })()
     }
   }, [shown, childrenData, items])
+
+  useEffect(() => {
+    if (childrenData != null) {
+      const newData = { ...childrenData }
+      updateChildrenData(newData)
+      setChildrenData(newData)
+    }
+  }, [allExpansionState])
+
+  function updateChildrenData(data: any) {
+    for (const item of items) {
+      const name = item.filters ? item.displayName : item.name
+      const itemData = data[name]
+      if (itemData) {
+        if (allExpansionState != null) {
+          itemData.expanded = allExpansionState
+        }
+        itemData.allExpansionState = allExpansionState
+      }
+      if (allExpansionState != null && expansionState.current != null) {
+        expansionState.current[name] = allExpansionState
+      }
+    }
+    if (expansionState.current != null) {
+      writeExpansionState(storageKey, expansionState.current)
+    }
+  }
 
   async function openPage(e: MouseEvent, item: any) {
     e.preventDefault()
@@ -146,16 +185,23 @@ function SubList({
     }
   }
 
-  function toggleChild(e: Event, itemName: string) {
+  function toggleChild(e: MouseEvent, itemName: string) {
     e.preventDefault()
     e.stopPropagation()
-    const newChildrenData = produce(childrenData, (draft: any) => {
-      draft[itemName].expanded = !draft[itemName].expanded
-    })
-    setChildrenData(newChildrenData)
+
+    const altKey = e.altKey
+    const newData = { ...childrenData }
+    const expanded = !newData[itemName].expanded
+    newData[itemName].expanded = expanded
+    if (altKey) {
+      newData[itemName].allExpansionState = expanded
+    } else {
+      newData[itemName].allExpansionState = undefined
+    }
+    setChildrenData(newData)
 
     if (expansionState.current) {
-      expansionState.current[itemName] = !childrenData[itemName].expanded
+      expansionState.current[itemName] = expanded
       writeExpansionState(storageKey, expansionState.current)
     }
   }
@@ -197,7 +243,7 @@ function SubList({
               {data && (
                 <FavArrow
                   expanded={data.expanded}
-                  onToggle={(e: Event) =>
+                  onToggle={(e: MouseEvent) =>
                     item.filters
                       ? toggleChild(e, item.displayName)
                       : toggleChild(e, item.name)
@@ -211,6 +257,7 @@ function SubList({
                 shown={data.expanded}
                 storageKey={`${storageKey}-${displayName}`}
                 readKeys={readKeys}
+                allExpansionState={data.allExpansionState}
               />
             )}
           </div>
