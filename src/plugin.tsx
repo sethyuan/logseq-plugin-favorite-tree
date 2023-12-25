@@ -285,9 +285,9 @@ function needsProcessing(txData: any[]) {
   let oldProperty, newProperty
   let oldQuickFilters, newQuickFilters
   for (const [_e, attr, val, _tx, added] of txData) {
-    if (attr === "originalName") return true
-    if (hierarchyProperty === "tags" && attr === "tags") return true
-    if (attr === "properties") {
+    if (attr === "block/original-name") return true
+    if (hierarchyProperty === "tags" && attr === "block/tags") return true
+    if (attr === "block/properties") {
       if (val[hierarchyProperty]) {
         if (added) {
           newProperty = val[hierarchyProperty]
